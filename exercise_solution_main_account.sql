@@ -28,11 +28,15 @@ OQIDAQAB';
 select * from snowflake.ACCOUNT_USAGE.LOGIN_HISTORY
 ;
 
+use role sysadmin;
+create database admin;
+
 use role accountadmin;
+
 --authentication policy to enforce MFA
 CREATE AUTHENTICATION POLICY mfa_enforcement_policy
   MFA_ENROLLMENT = 'REQUIRED'
-  MFA_AUTHENTICATION_METHODS = ('PASSWORD');
+  AUTHENTICATION_METHODS = ('PASSWORD');
 
 --set to account
 ALTER ACCOUNT SET AUTHENTICATION POLICY mfa_enforcement_policy;
@@ -134,10 +138,6 @@ use role developer;
 create table tmp as select * from menu where 1 = 0;
 drop table tmp;
 
-
---granting secondary roles - need to run it every time you login
-USE SECONDARY ROLES all;
-
 use role securityadmin;
 --better to add it directly into user parameters
 alter user tomas set default_secondary_roles = ('all');
@@ -196,7 +196,7 @@ grant database role share_provider2 to share s_tasty_share;
 show shares;
 
 --adding our other account to the share
-alter share s_tasty_share add accounts = wzfcleo.azure_replica;
+alter share s_tasty_share add accounts = EKYFGUU.WQ65212;
 
 --------------------------------------04 privileges ----------------------------------
 
@@ -242,6 +242,10 @@ show future grants in schema raw_pos;
 --how to process result as a table
 show grants on schema raw_pos;
 select * from table(result_scan(last_query_id())) where "grantee_name" = 'ANALYST';
+
+show grants on schema raw_pos
+->>
+select * from $1 where "grantee_name" = 'ANALYST';
 
 
 --revoking the privileges
@@ -530,9 +534,11 @@ use role orgadmin;
 select CURRENT_ORGANIZATION_NAME();
 
 --enable replication for both our accounts
-SELECT SYSTEM$GLOBAL_ACCOUNT_SET_PARAMETER('wzfcleo.xt95060','ENABLE_ACCOUNT_DATABASE_REPLICATION', 'true'); --returns success
+SELECT SYSTEM$GLOBAL_ACCOUNT_SET_PARAMETER('GMOIOBE.OS12742','ENABLE_ACCOUNT_DATABASE_REPLICATION', 'true'); --returns success
 
-SELECT SYSTEM$GLOBAL_ACCOUNT_SET_PARAMETER('wzfcleo.azure_replica','ENABLE_ACCOUNT_DATABASE_REPLICATION', 'true'); --returns success
+
+
+SELECT SYSTEM$GLOBAL_ACCOUNT_SET_PARAMETER('gmoiobe.azure_replica','ENABLE_ACCOUNT_DATABASE_REPLICATION', 'true'); --returns success
 
 use role accountadmin;
 
@@ -542,7 +548,7 @@ drop failover group my_failover_group;
 CREATE FAILOVER GROUP my_failover_group
   OBJECT_TYPES = ROLES, WAREHOUSES, DATABASES
   ALLOWED_DATABASES = tasty_bytes_sample_data
-  ALLOWED_ACCOUNTS = wzfcleo.azure_replica
+  ALLOWED_ACCOUNTS = gmoiobe.azure_replica
   REPLICATION_SCHEDULE = '10 MINUTE';
 
 --check the group
